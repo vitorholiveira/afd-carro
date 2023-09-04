@@ -1,82 +1,90 @@
-def transicao(estado, op):
+def transicao(estado, op, labelOperacao, labelEstado):
+    '''
+    Função de transição autômato.
+    Retorna o próximo estado se a função de transição for definida, caso contrário retorna a string "indefinido".
+    '''
     categoria = estado[0]
     index = estado[1]
+    operacao = "?"
 
     # ciclo inicial do autômato
     if categoria == 'i':
         if index == '0' and op == 's':
-            print("LIGOU O CARRO")
-            return "i1"
+            operacao = "LIGOU O CARRO" 
+            proxEstado = "i1"
         elif index == '1' and op == 'v':
-            print("ABAIXOU O FREIO DE MAO")
-            return "i2"
+            operacao = "ABAIXOU O FREIO DE MÃO"
+            proxEstado = "i2"
         elif index == '2' and op == 'm':
-            print("APERTOU A EMBREGEM")
-            return "m0"
+            operacao = "APERTOU A EMBREGEM"
+            proxEstado = "m0"
         else:
-            return "indefinido"
+            proxEstado = "indefinido"
         
-    # estados em que o carro está em movimento
+    # estados em que o carro está com a marcha engatada
     elif categoria == 'q':
         velocidade = int(estado[2])
         # carro para quando está na velocidade mínima ou com freada brusca
         if (estado == "q11" and op == 'f') or op == '!':
-            print("PAROU O CARRO")
-            return "p0"
+            operacao = "PAROU O CARRO"
+            proxEstado = "p0"
         # não é possível acelerar quando está na velocidade máxima da marcha
         elif op == 'a' and velocidade < 2:
-            print("ACELEROU O CARRO")
-            return categoria + index + str(velocidade + 1)
+            operacao = "ACELEROU O CARRO"
+            proxEstado = 'q' + index + str(velocidade + 1)
         # não é possível frear quando o carro está na velocidade mínima da marcha
         elif op == 'f' and velocidade > 0:
-            print("FREOU O CARRO")
-            return categoria + index + str(velocidade - 1)
+            operacao = "FREOU O CARRO"
+            proxEstado = 'q' + index + str(velocidade - 1)
         # não é possível apertar a embreagem no ultimo estado de movimento
         elif op == 'm' and velocidade == 2 and estado != "q52":
-            print("APERTOU A EMBREAGEM")
-            return op + index
-        # não é possível apertar a embreagem no último estado de movimento
+            operacao = "APERTOU A EMBREAGEM"
+            proxEstado = 'm' + index
+        # não é possível apertar a embreagem no primeiro estado de movimento
         elif op == 'm' and velocidade == 0 and estado != "q10":
-            print("APERTOU A EMBREAGEM")
-            return op + str(int(index) - 1)
+            operacao = "APERTOU A EMBREAGEM"
+            proxEstado = 'm' + str(int(index) - 1)
         elif op == 'e':
-            print("GIROU 90 GRAUS PARA A ESQUERDA")
-            return estado
+            operacao = "GIROU 90 GRAUS PARA A ESQUERDA"
+            proxEstado = estado
         elif op == 'd':
-            print("GIROU 90 GRAUS PARA A DIREITA")
-            return estado
+            operacao = "GIROU 90 GRAUS PARA A DIREITA"
+            proxEstado = estado
         else:
-            return "indefinido"
+            proxEstado = "indefinido"
         
     # estados em que o carro está no seletor de marcha (apertou a embreagem anteriormente)
     elif categoria == 'm':
-        if op == index:
-            print("SELEIONOU A "+index+" MARCHA")
-            return 'q' + index + '2'
+        if op == index and index != '0':
+            operacao = "SELEIONOU A "+index+"ª MARCHA"
+            proxEstado = 'q' + index + '2'
         elif op == str(int(index) + 1):
-            print("SELECIONOU A "+str(int(index)+1)+" MARCHA")
-            return 'q' + str(int(index) + 1) + '0'
-        elif estado == 'm0' and op == 'n':
-            print("COLOCOU EM PONTO MORTO")
-            return 'f0'
+            operacao = "SELECIONOU A "+str(int(index)+1)+"ª MARCHA"
+            proxEstado = 'q' + str(int(index) + 1) + '0'
+        elif index == '0' and op == 'n':
+            operacao = "COLOCOU EM PONTO MORTO"
+            proxEstado = "f0"
         else:
-            return "indefinido"
+            proxEstado = "indefinido"
         
     # estados do ciclo final
     elif categoria == 'f':
         if index == '0' and op == '^':
-            print("LEVANTOU O FREIO DE MÃO")
-            return 'f1'
+            operacao = "LEVANTOU O FREIO DE MÃO"
+            proxEstado = "f1"
         elif index == '1' and op == '0':
-            print("DESLIGOU O CARRO")
-            return 'f2'
+            operacao = "DESLIGOU O CARRO"
+            proxEstado = "f2"
         else:
-            return "indefinido"
+            proxEstado = "indefinido"
         
     # estado em que o carro está parado
-    # é preciso apertar a embreagem para não apagar o carro
     elif estado == "p0" and op == 'm':
-        print("APERTOU A EMBREAGEM")
-        return "m0"
+        operacao = "APERTOU A EMBREAGEM"
+        proxEstado = "m0"
     else:
-        return "indefinido"
+        proxEstado = "indefinido"
+    
+    labelOperacao.config(text=operacao)
+    labelEstado.config(text="("+estado+","+op+") -> "+proxEstado )
+    return proxEstado
