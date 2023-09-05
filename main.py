@@ -1,13 +1,29 @@
+#!/usr/bin/python3
+
 from tkinter import *
 import leitura
 
-menu = Tk()
-menu.title("ababa")
+janela = Tk()
+janela.title("ababa")
+janela.geometry("300x300")
 
-Label(menu, text="Selecione o método de interação:").pack(padx=15)
+label = Label(janela, text="Selecione o método de interação:")
+label.pack()
 
-Button(menu, text="Manual", command=leitura.le_terminal).pack()
+def fimMenu(leitura):
+    '''
+    Função que apaga os itens do Menu.
+    Tem como parâmetro uma função referente ao modo de interação com o usuário.
+    '''
+    label.destroy()
+    botaoInput.destroy()
+    botaoArquivo.destroy()
+    leitura(janela)
 
-Button(menu, text="Automático", command=leitura.le_arquivo).pack()
+botaoInput = Button(janela, text="Input", command= lambda : fimMenu(leitura.le_input))
+botaoInput.pack()
 
-menu.mainloop()
+botaoArquivo = Button(janela, text="Arquivo", command= lambda : fimMenu(leitura.le_arquivo))
+botaoArquivo.pack()
+
+janela.mainloop()

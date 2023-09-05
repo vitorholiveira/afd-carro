@@ -1,110 +1,138 @@
 import automato
 from tkinter import *
-from time import sleep
+from PIL import ImageTk,Image
 
-def le_arquivo():
+def le_arquivo(janela):
     '''
-    Função que def transicao(estado, operacao, labelEstado, labelSimbolo):
-    op = operacao.get()
-    estado = automato.transicao(estado,op)
-    labelEstado.text(estado)
-    labelSimbolo.text(op)lê toda a fita de comando de um arquivo e roda ela no autômato.
-    Retorna o estado em que terminou a computação ou a string "indefinido" se alguma transição for indefinida.
+    Função que pede para o usuário o nome de um arquivo csv e roda no autômato.
+    Pode fazer passo a passo ou realizar o reconhecimento direto.
     '''
-
-    janela = Tk()
-    janela.title("Carro")
-
     nome = Label(janela, text="Digite o nome de um arquivo csv:")
+    entradaArq = Entry(janela, width=30)
     nome.pack()
-    entradaArq = Entry(janela, width=10)
     entradaArq.pack()
 
-    global linha
-
+    # Abre o arquivo
     def abrir():
-        with open(nome, "r") as arquivo:
+        global linha
+        with open(entradaArq.get(), "r") as arquivo:
             linha = arquivo.readline().strip()
             linha = linha.split(',')
-        botao.destroy()
+        botaoAbrir.destroy()
         nome.destroy()
         entradaArq.destroy()
-        
-    botao = Button(janela, text="Abrir Arquivo", command=abrir)
-    botao.pack()
 
-    global estado
-    estado = "i0"
+        # Mostra a operação realizada e a função de transição
+        labelOperacao = Label(janela, text="COMEÇOU O PERCURSO")
+        labelEstado = Label(janela, text="Estado inicial: i0")
+        labelOperacao.pack()
+        labelEstado.pack()
 
-    labelOperacao = Label(janela, text="COMEÇOU O PERCURSO")
-    labelOperacao.pack()
-    labelEstado = Label(janela, text="Estado inicial: "+estado)
-    labelEstado.pack()
-
-    def reconhecer(linha):  
-        for op in linha:
-            global estado
-            estado = automato.transicao(estado, op, labelOperacao, labelEstado)
-            if estado == "indefinido":
-                return
-    
-    reconhecer(linha)
-
-    if estado == "f2":
-        Label(janela, text="COMPLETOU O PERCURSO!").pack(padx=50)
-    elif estado == "indefinido":
-        Label(janela, text="FUNÇÃO INDEFINIDA!").pack(padx=50)
-    else:
-        Label(janela, text="NÃO COMPLETOU O PERCURSO!").pack(padx=50)
-    
-    mainloop()
-
-    
-
-def le_terminal():
-    '''
-    Função que lê as operações da fita de comando do terminal, uma a uma, e às roda no autômato
-    Retorna o estado em que terminou a computação ou a string "indefinido" se alguma transição for indefinida.
-    '''
-    janela = Tk()
-    janela.title("Carro")
-
-    global estado
-    estado = "i0"
-
-    labelOperacao = Label(janela, text="COMEÇOU O PERCURSO")
-    labelOperacao.pack()
-    labelEstado = Label(janela, text="Estado inicial: "+estado)
-    labelEstado.pack()
-    text = Label(janela, text="Digite um símbolo:")
-    text.pack(padx=100)
-    operacao = Entry(janela, width=10)
-    operacao.pack()
-
-    def click():
-        op = operacao.get()
         global estado
-        estado = automato.transicao(estado, op, labelOperacao, labelEstado)
-        operacao.delete(0, END)
-        if estado == "indefinido":
-            fim()
+        estado = "i0"
 
-    def fim():  
-        if estado == "f2":
-            Label(janela, text="COMPLETOU O PERCURSO!").pack(padx=50)
-        elif estado == "indefinido":
-            Label(janela, text="FUNÇÃO INDEFINIDA!").pack(padx=50)
-        else:
-            Label(janela, text="NÃO COMPLETOU O PERCURSO!").pack(padx=50)
-        text.destroy()
-        operacao.destroy()
+        # Reconhece um simbolo por vez
+        def passo():
+            global estado
+            estado = automato.transicao(estado, linha[0], labelOperacao, labelEstado, img)
+            linha.pop(0)
+            if estado == "indefinido" or len(linha) == 0:
+                fimArquivo()
+
+        # Reconhece toda palavra do arquivo
+        def reconhecer():
+            global estado
+            for op in linha:
+                estado = automato.transicao(estado, op, labelOperacao, labelEstado, img)
+                if estado == "indefinido":
+                    break
+            fimArquivo()
+
+        # Apaga os itens da tela atual e chama a função que gera a tela final
+        def fimArquivo():
+            botaoPasso.destroy()
+            botaoReconhecer.destroy()
+            fim(janela, img, estado)
+
+        botaoPasso = Button(janela, text="Próxima operação", command=passo)
+        botaoReconhecer = Button(janela, text="Reconhecer", command=reconhecer)
+        botaoPasso.pack()
+        botaoReconhecer.pack()
+
+        imagem = ImageTk.PhotoImage(Image.open("imagens/carroparado.png"))
+        img = Label(image=imagem)
+        img.image = imagem
+        img.pack()
+        
+    botaoAbrir = Button(janela, text="Abrir Arquivo", command=abrir)
+    botaoAbrir.pack()
+
+# ------------------------------------------------------------------------------------
+
+def le_input(janela):
+    '''
+    Função que pede para o usuário símbolos e roda no autômato, um por vez.
+    '''
+    # Interface de interação com o usuário
+    # Mostra a operação realizada e a função de transição
+    labelOperacao = Label(janela, text="COMEÇOU O PERCURSO")
+    labelEstado = Label(janela, text="Estado inicial: i0")
+    labelTexto = Label(janela, text="Digite um símbolo:")
+    entryOperacao = Entry(janela, width=10)
+    labelOperacao.pack()
+    labelEstado.pack()
+    labelTexto.pack()
+    entryOperacao.pack()
+
+    global estado
+    estado = "i0"
+
+    # Reconhece um input do usuário
+    def click():
+        op = entryOperacao.get()
+        global estado
+        estado = automato.transicao(estado, op, labelOperacao, labelEstado, img)
+        entryOperacao.delete(0, END)
+        if estado == "indefinido":
+            fimInput()
+
+    # Apaga os itens da tela atual e chama a função que gera a tela final
+    def fimInput():
+        labelTexto.destroy()
+        entryOperacao.destroy()
         botao.destroy()
-        finaliza.destroy()
+        botaoFim.destroy()
+        fim(janela, img, estado)
 
     botao = Button(janela, text="Realizar Operação", command=click)
+    botaoFim = Button(janela, text="Terminar Percurso", command=fimInput)
     botao.pack()
+    botaoFim.pack()
 
-    finaliza = Button(janela, text="Terminar Percurso", command=fim)
-    finaliza.pack()
+    imagem = ImageTk.PhotoImage(Image.open("imagens/carroparado.png"))
+    img = Label(image=imagem)
+    img.image = imagem
+    img.pack()
 
-    janela.mainloop()
+# ------------------------------------------------------------------------------------
+
+def fim(janela, img, estado):
+    '''
+    Função para gerar a tela final, após uma palavra ser reconhecida
+    '''
+
+    if estado == "f2":
+        Label(janela, text="COMPLETOU O PERCURSO!").pack()
+    elif estado == "indefinido":
+        Label(janela, text="FUNÇÃO INDEFINIDA!").pack()
+    else:
+        Label(janela, text="NÃO COMPLETOU O PERCURSO!").pack()
+
+    if estado == "f2":
+        like = ImageTk.PhotoImage(Image.open("imagens/like.png"))
+        img.configure(image=like)
+        img.image = like
+    else:
+        dislike = ImageTk.PhotoImage(Image.open("imagens/dislike.png"))
+        img.configure(image=dislike)
+        img.image = dislike
