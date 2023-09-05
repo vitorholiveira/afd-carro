@@ -1,6 +1,5 @@
 import automato
 from tkinter import *
-from PIL import ImageTk,Image
 
 def le_arquivo(janela):
     '''
@@ -34,7 +33,7 @@ def le_arquivo(janela):
         # Reconhece um simbolo por vez
         def passo():
             global estado
-            estado = automato.transicao(estado, linha[0], labelOperacao, labelEstado, img)
+            estado = automato.transicao(estado, linha[0], labelOperacao, labelEstado)
             linha.pop(0)
             if estado == "indefinido" or len(linha) == 0:
                 fimArquivo()
@@ -43,7 +42,7 @@ def le_arquivo(janela):
         def reconhecer():
             global estado
             for op in linha:
-                estado = automato.transicao(estado, op, labelOperacao, labelEstado, img)
+                estado = automato.transicao(estado, op, labelOperacao, labelEstado)
                 if estado == "indefinido":
                     break
             fimArquivo()
@@ -52,17 +51,12 @@ def le_arquivo(janela):
         def fimArquivo():
             botaoPasso.destroy()
             botaoReconhecer.destroy()
-            fim(janela, img, estado)
+            fim(janela, estado)
 
         botaoPasso = Button(janela, text="Próxima operação", command=passo)
         botaoReconhecer = Button(janela, text="Reconhecer", command=reconhecer)
         botaoPasso.pack()
         botaoReconhecer.pack()
-
-        imagem = ImageTk.PhotoImage(Image.open("imagens/carroparado.png"))
-        img = Label(image=imagem)
-        img.image = imagem
-        img.pack()
         
     botaoAbrir = Button(janela, text="Abrir Arquivo", command=abrir)
     botaoAbrir.pack()
@@ -91,7 +85,7 @@ def le_input(janela):
     def click():
         op = entryOperacao.get()
         global estado
-        estado = automato.transicao(estado, op, labelOperacao, labelEstado, img)
+        estado = automato.transicao(estado, op, labelOperacao, labelEstado)
         entryOperacao.delete(0, END)
         if estado == "indefinido":
             fimInput()
@@ -102,21 +96,16 @@ def le_input(janela):
         entryOperacao.destroy()
         botao.destroy()
         botaoFim.destroy()
-        fim(janela, img, estado)
+        fim(janela, estado)
 
     botao = Button(janela, text="Realizar Operação", command=click)
     botaoFim = Button(janela, text="Terminar Percurso", command=fimInput)
     botao.pack()
     botaoFim.pack()
 
-    imagem = ImageTk.PhotoImage(Image.open("imagens/carroparado.png"))
-    img = Label(image=imagem)
-    img.image = imagem
-    img.pack()
-
 # ------------------------------------------------------------------------------------
 
-def fim(janela, img, estado):
+def fim(janela, estado):
     '''
     Função para gerar a tela final, após uma palavra ser reconhecida
     '''
@@ -127,12 +116,3 @@ def fim(janela, img, estado):
         Label(janela, text="FUNÇÃO INDEFINIDA!").pack()
     else:
         Label(janela, text="NÃO COMPLETOU O PERCURSO!").pack()
-
-    if estado == "f2":
-        like = ImageTk.PhotoImage(Image.open("imagens/like.png"))
-        img.configure(image=like)
-        img.image = like
-    else:
-        dislike = ImageTk.PhotoImage(Image.open("imagens/dislike.png"))
-        img.configure(image=dislike)
-        img.image = dislike
