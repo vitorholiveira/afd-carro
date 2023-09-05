@@ -1,16 +1,29 @@
+#!/usr/bin/python3
+
+from tkinter import *
 import leitura
 
-modo = "ABABA"
-while(modo != '2' and modo != '1'):
-    modo = input("\nSelecione o método de leitura:\n1)Terminal \n2)Arquivo\nDigite a opcao desejada: ")
+janela = Tk()
+janela.title("ababa")
+janela.geometry("300x300")
 
-if(modo == '2'):
-    estado = leitura.le_arquivo()
-elif(modo == '1'):
-    estado = leitura.le_comando()
+label = Label(janela, text="Selecione o método de interação:")
+label.pack()
 
-if estado == "f2":
-    print("\n-> COMPLETOU O PERCURSO\n")
-else:
-    print("\n-> OPERACCAO INDEFINIDA")
-    print("-> ESTADO: " + estado + "\n")
+def fimMenu(leitura):
+    '''
+    Função que apaga os itens do Menu.
+    Tem como parâmetro uma função referente ao modo de interação com o usuário.
+    '''
+    label.destroy()
+    botaoInput.destroy()
+    botaoArquivo.destroy()
+    leitura(janela)
+
+botaoInput = Button(janela, text="Input", command= lambda : fimMenu(leitura.le_input))
+botaoInput.pack()
+
+botaoArquivo = Button(janela, text="Arquivo", command= lambda : fimMenu(leitura.le_arquivo))
+botaoArquivo.pack()
+
+janela.mainloop()

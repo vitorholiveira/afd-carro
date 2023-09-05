@@ -19,6 +19,10 @@ Foi implementada a função de transição do AFD, a qual recebe um estado e um 
 - 4	: Quarta marcha
 - 5	: Quinta marcha
 - n	: Neutro
-- d	: Gira 90° para a direita
-- e	: Gira 90° para a esquerda
-
+- d	: Girar 90° para a direita
+- e	: Girar 90° para a esquerda
+## Tutorial de uso:
+  Ao executar "main.py", deve-se digitar "1" para selecionar o modo de interação pelo terminal ou "2" para o reconhecedor automático por meio de um arquivo csv. Nos dois modos, o estado inicial é o "i0" e, quando o programa realizar a função de transição, é escrito no terminal a operação realizada pelo motorista acompanhado da própria função.
+  - Terminal: O programa pede um símbolo do alfabeto da linguagem, o qual representa uma operação. Quando estado atual possui uma transição com esse símbolo, ele é atualizado e um nova operação é requisitada. Caso contrário a função é indefinida e o programa reijeita a palavra. Para finalizar a leitura, é preciso digitar "fim" ao invés de um símbolo do alfabeto. Se o estado atual for final a palavra é aceita, caso contrário é rejeitada.
+  - Arquivo: O programa pede o nome do arquivo de entrada, o qual deve ser estar no formato csv em que cada campo possui um símbolo do alfabeto da linguagem. Para cada caractere, a função de transição é realizada com o estado atual. Se ela for definida, o estado é atualizado, caso contrário, o programa interromperá a computação e a palavra será rejeitada. Ao terminar a leitura do arquivo, se o estado atual for final a palavra é aceita, caso contrário rejeitada.
+  
